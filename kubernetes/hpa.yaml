@@ -1,0 +1,19 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: nest-kedacore-demo
+  labels:
+    app: nest-kedacore-demo
+spec:
+  maxReplicaCount: 5
+  minReplicaCount: 3
+  pollingInterval: 15
+  scaleTargetRef:
+    name: nest-kedacore-demo
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server
+        metricName: cpu_usage
+        query: sum(irate(process_cpu_seconds_total{app="nest-kedacore-demo"}[2m])) * 100
+        threshold: '30'

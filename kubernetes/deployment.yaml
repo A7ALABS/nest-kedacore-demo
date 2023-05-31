@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nest-kedacore-demo
+  labels:
+    app: nest-kedacore-demo
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nest-kedacore-demo
+
+  # template is abstraction over pods
+  # one pod can have multiple containers
+  template:
+    metadata:
+      labels:
+        app: nest-kedacore-demo
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '3000'
+    spec:
+      containers:
+        - name: nest-kedacore-demo
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8001
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 300
+            successThreshold: 1
+            timeoutSeconds: 300
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8001
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 300
+            successThreshold: 1
+            timeoutSeconds: 300
+          env:
+          - name: LEVEL
+            value: "production"
+          image: nest-kedacore-demo:latest
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+          ports:
+            - containerPort: 3000
